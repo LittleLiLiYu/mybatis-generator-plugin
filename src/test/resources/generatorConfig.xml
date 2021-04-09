@@ -44,7 +44,7 @@
         </javaClientGenerator>
 
         <!--    待生成的表    -->
-        <table tableName="lava_i18n" domainObjectName="LavaI18n">
+        <table tableName="lava_i18n" >
             <generatedKey column="id" sqlStatement="mysql" identity="true"/>
         </table>
 

@@ -160,6 +160,18 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
     }
 
     @Override
+    public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        topLevelClass.addJavaDocLine("/**\n *\n * @author \n */");
+        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
+    }
+
+    @Override
+    public boolean modelExampleClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        topLevelClass.addJavaDocLine("/**\n *\n * @author \n */");
+        return super.modelExampleClassGenerated(topLevelClass, introspectedTable);
+    }
+
+    @Override
     public boolean clientGenerated(Interface interfaze, TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         String mapperType = introspectedTable.getMyBatis3JavaMapperType();
 //        已生成 则不覆盖
@@ -179,6 +191,8 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
 
         interfaze.addImportedType(mapperJavaType);
         interfaze.addAnnotation("@Mapper");
+
+        interfaze.addJavaDocLine("/**\n *\n * @author \n */");
 
 //        BaseMapper已集成默认接口
         interfaze.getMethods().clear();
