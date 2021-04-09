@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <properties resource="generatorConfig.properties" />
+
+    <!-- 生成配置 -->
+    <context id="mysql" defaultModelType="flat" targetRuntime="MyBatis3">
+        <property name="suppressAllComments" value="true" />
+        <property name="useActualColumnNames" value="false" />
+        <property name="javaFileEncoding" value="UTF-8" />
+
+        <!-- 配置插件 -->
+        <plugin type="com.kuangyu.core.mybatis.generator.MultiDbPaginationPlugin">
+            <property name="basePath" value="${basePath}/main/java"/>
+            <property name="basePackage" value="${basePackage}" />
+            <property name="baseXmlPackage" value="${baseXmlPackage}" />
+        </plugin>
+
+        <!-- 配置数据库连接 -->
+        <jdbcConnection driverClass="${jdbc.driverClass}"
+                        connectionURL="${jdbc.url}" userId="${jdbc.user}" password="${jdbc.password}">
+        </jdbcConnection>
+
+        <!--    TINYINT 转为 INTEGER    -->
+        <javaTypeResolver type="com.kuangyu.core.mybatis.generator.DefaultJavaTypeResolverImpl">
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+
+        <!-- 生成文件位置 -->
+        <javaModelGenerator targetPackage="${basePackage}.entity"
+                            targetProject="${basePath}/main/java">
+            <property name="enableSubPackages" value="true" />
+            <property name="trimStrings" value="true" />
+        </javaModelGenerator>
+        <sqlMapGenerator targetPackage="${baseXmlPackage}"
+                         targetProject="${basePath}/main/resources">
+            <property name="enableSubPackages" value="true" />
+        </sqlMapGenerator>
+        <javaClientGenerator type="XMLMAPPER"
+                             targetPackage="${basePackage}.mapper" targetProject="${basePath}/main/java">
+            <property name="enableSubPackages" value="true" />
+        </javaClientGenerator>
+
+        <!--    待生成的表    -->
+        <table tableName="lava_i18n" domainObjectName="LavaI18n">
+            <generatedKey column="id" sqlStatement="mysql" identity="true"/>
+        </table>
+
+
+    </context>
+</generatorConfiguration>
