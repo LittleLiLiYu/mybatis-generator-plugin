@@ -2,6 +2,7 @@ package com.kuangyu.core.mapper;
 
 import org.apache.ibatis.annotations.Param;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -36,10 +37,10 @@ public interface BaseMapper<T, E> {
 
     /**
      * 按主键删除
-     * @param record
+     * @param id
      * @return
      */
-    Integer deleteByPrimaryKey(T record);
+    Integer deleteByPrimaryKey(@Param("id") Serializable id);
 
     /**
      * 按条件删除
@@ -53,14 +54,14 @@ public interface BaseMapper<T, E> {
      * @param example
      * @return
      */
-    Integer countByExample(E example);
+    Long countByExample(E example);
 
     /**
      * 按主键查询记录
-     * @param record
+     * @param id
      * @return
      */
-    T selectByPrimaryKey(T record);
+    T selectByPrimaryKey(@Param("id") Serializable id);
 
     /**
      * 按条件查询列表
