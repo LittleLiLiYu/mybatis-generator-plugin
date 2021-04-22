@@ -1,5 +1,6 @@
 package com.kuangyu.core.mybatis.generator;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.kuangyu.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -10,6 +11,8 @@ import org.mybatis.generator.codegen.XmlConstants;
 import org.mybatis.generator.config.PropertyRegistry;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -160,14 +163,72 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
     }
 
     @Override
+    public boolean sqlMapSelectByPrimaryKeyElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        element.getAttributes().remove(2);
+        element.addAttribute(new Attribute("parameterType", java.io.Serializable.class.getName()));
+        Element element1 = element.getElements().get(8);
+        if (element1 instanceof TextElement) {
+            TextElement whereElement = (TextElement) element.getElements().remove(8);
+            IntrospectedColumn column = introspectedTable.getPrimaryKeyColumns().get(0);
+            TextElement where = new TextElement(whereElement.getContent().replace(column.getJavaProperty(), "id"));
+            element.addElement(where);
+        }
+        return super.sqlMapSelectByPrimaryKeyElementGenerated(element, introspectedTable);
+    }
+
+    @Override
+    public boolean sqlMapDeleteByPrimaryKeyElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        element.getAttributes().remove(1);
+        element.addAttribute(new Attribute("parameterType", java.io.Serializable.class.getName()));
+        Element element1 = element.getElements().get(6);
+        if (element1 instanceof TextElement) {
+            TextElement whereElement = (TextElement) element.getElements().remove(6);
+            IntrospectedColumn column = introspectedTable.getPrimaryKeyColumns().get(0);
+            TextElement where = new TextElement(whereElement.getContent().replace(column.getJavaProperty(), "id"));
+            element.addElement(where);
+        }
+        return super.sqlMapDeleteByPrimaryKeyElementGenerated(element, introspectedTable);
+    }
+
+    @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        topLevelClass.addJavaDocLine("/**\n *\n * @author \n */");
+//        添加注释
+        topLevelClass.addJavaDocLine("/**");
+        topLevelClass.addJavaDocLine(" *");
+        topLevelClass.addJavaDocLine(" * @author auto");
+        topLevelClass.addJavaDocLine(" * @date " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        topLevelClass.addJavaDocLine(" */");
+//        添加JSONField注解 import
+        FullyQualifiedJavaType dateType = new FullyQualifiedJavaType(Date.class.getName());
+        topLevelClass.getImportedTypes().forEach(fullyQualifiedJavaType -> {
+            if (dateType.getFullyQualifiedName().equals(fullyQualifiedJavaType.getFullyQualifiedName())) {
+                topLevelClass.addImportedType(JSONField.class.getName());
+            }
+        });
+//        对 java.util.Date类型字段添加 JSONField注解
+        topLevelClass.getFields().stream().forEach(field -> {
+            if (dateType.getFullyQualifiedName().equals(field.getType().getFullyQualifiedName())) {
+                field.addAnnotation("@JSONField(format = \"yyyy-MM-dd HH:mm:ss\")");
+            }
+//            清除JavaDoc注释
+            field.getJavaDocLines().clear();
+        });
+//        清除JavaDoc注释
+        topLevelClass.getMethods().stream().forEach(method -> method.getJavaDocLines().clear());
         return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
     }
 
     @Override
     public boolean modelExampleClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        topLevelClass.addJavaDocLine("/**\n *\n * @author \n */");
+//        添加注释
+        topLevelClass.addJavaDocLine("/**");
+        topLevelClass.addJavaDocLine(" *");
+        topLevelClass.addJavaDocLine(" * @author auto");
+        topLevelClass.addJavaDocLine(" * @date " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        topLevelClass.addJavaDocLine(" */");
+//        清除JavaDoc注释
+        topLevelClass.getFields().stream().forEach(field -> field.getJavaDocLines().clear());
+        topLevelClass.getMethods().stream().forEach(method -> method.getJavaDocLines().clear());
         return super.modelExampleClassGenerated(topLevelClass, introspectedTable);
     }
 
@@ -180,7 +241,7 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
                            mapperType.substring(mapperType.lastIndexOf(".") + 1) + ".java")) {
             return false;
         }
-
+//        添加父接口BaseMapper，添加引用类，添加对应的import
         FullyQualifiedJavaType entityType = new FullyQualifiedJavaType(introspectedTable.getBaseRecordType());
         FullyQualifiedJavaType exampleType = new FullyQualifiedJavaType(introspectedTable.getExampleType());
         FullyQualifiedJavaType baseDoType = new FullyQualifiedJavaType(BaseMapper.class.getName()  + "<" + entityType.getShortName() + ", " + exampleType.getShortName() + ">");
@@ -188,15 +249,28 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
         interfaze.addSuperInterface(baseDoType);
         interfaze.addImportedType(entityType);
         interfaze.addImportedType(exampleType);
-
+//        添加Mapper注解及import
         interfaze.addImportedType(mapperJavaType);
         interfaze.addAnnotation("@Mapper");
 
-        interfaze.addJavaDocLine("/**\n *\n * @author \n */");
+//        添加注释
+        interfaze.addJavaDocLine("/**");
+        interfaze.addJavaDocLine(" *");
+        interfaze.addJavaDocLine(" * @author auto");
+        interfaze.addJavaDocLine(" * @date " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        interfaze.addJavaDocLine(" */");
 
 //        BaseMapper已集成默认接口
         interfaze.getMethods().clear();
         return super.clientGenerated(interfaze, topLevelClass, introspectedTable);
+    }
+
+    @Override
+    public boolean sqlMapCountByExampleElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+
+        element.getAttributes().remove(2);
+        element.addAttribute(new Attribute("resultType", Long.class.getName()));
+        return super.sqlMapCountByExampleElementGenerated(element, introspectedTable);
     }
 
     @Override

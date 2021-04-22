@@ -15,5 +15,7 @@ public class DefaultJavaTypeResolverImpl extends JavaTypeResolverDefaultImpl {
         super();
         typeMap.put(Types.TINYINT, new JdbcTypeInformation("TINYINT",
                                                            new FullyQualifiedJavaType(Integer.class.getName())));
+        typeMap.put(Types.LONGVARCHAR, new JdbcTypeInformation("VARCHAR",
+                                                               new FullyQualifiedJavaType(String.class.getName())));
     }
 }
