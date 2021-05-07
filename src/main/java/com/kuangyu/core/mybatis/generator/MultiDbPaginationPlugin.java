@@ -26,13 +26,18 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
 
     protected final static String MAPPER_XML_FILE_ENDING_NAME = "Mapper.xml";
 
-    protected final static String PARAM_NAME_RECORD = "record";
-    protected final static String ANNOTATION_RECORD = "@Param(\"record\")";
-
-    protected final static String PARAM_NAME_EXAMPLE = "example";
-    protected final static String ANNOTATION_EXAMPLE = "@Param(\"example\")";
+//    protected final static String PARAM_NAME_RECORD = "record";
+//    protected final static String ANNOTATION_RECORD = "@Param(\"record\")";
+//
+//    protected final static String PARAM_NAME_EXAMPLE = "example";
+//    protected final static String ANNOTATION_EXAMPLE = "@Param(\"example\")";
 
     protected static FullyQualifiedJavaType mapperJavaType = new FullyQualifiedJavaType(Mapper.class.getName());
+
+    protected final static String ELEMENT_NAME_INSERT = "insert";
+    protected final static String ELEMENT_NAME_INSERT_SELECTIVE = "insertSelective";
+
+    protected final static String DATABASE_TYPE_MYSQL = "mysql";
 
     /**
      * 添删改Document的sql语句及属性
@@ -60,9 +65,9 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
         XmlElement insertElement = null;
         for (Element element : parentElement.getElements()) {
             XmlElement xmlElement = (XmlElement) element;
-            if (xmlElement.getName().equals("insert")) {
+            if (xmlElement.getName().equals(ELEMENT_NAME_INSERT)) {
                 for (Attribute attribute : xmlElement.getAttributes()) {
-                    if (attribute.getValue().equals("insert")) {
+                    if (attribute.getValue().equals(ELEMENT_NAME_INSERT)) {
                         insertElement = xmlElement;
                         break;
                     }
@@ -84,9 +89,9 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
 //        XmlElement oracleElement = null;
         for (Element element : parentElement.getElements()) {
             XmlElement xmlElement = (XmlElement) element;
-            if (xmlElement.getName().equals("insert")) {
+            if (xmlElement.getName().equals(ELEMENT_NAME_INSERT)) {
                 for (Attribute attribute : xmlElement.getAttributes()) {
-                    if (attribute.getValue().equals("insertSelective")) {
+                    if (attribute.getValue().equals(ELEMENT_NAME_INSERT_SELECTIVE)) {
                         oldElement = xmlElement;
                         mysqlElement = (XmlElement) this.copyElement(xmlElement);
 //                        oracleElement = (XmlElement) this.copyElement(xmlElement);
@@ -96,7 +101,7 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
             }
         }
         parentElement.getElements().remove(oldElement);
-        sqlInsertSelectiveGenerated(parentElement, "mysql", mysqlElement, introspectedTable);
+        sqlInsertSelectiveGenerated(parentElement, DATABASE_TYPE_MYSQL, mysqlElement, introspectedTable);
     }
 
     protected Element copyElement(Element element) {
@@ -144,7 +149,7 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
             }
         }
         // mysql添加属性
-        if (dbType != null && dbType.equals("mysql")) {
+        if (dbType != null && dbType.equals(DATABASE_TYPE_MYSQL)) {
             if (identity) {
                 element.addAttribute(new Attribute("useGeneratedKeys", "true"));
                 element.addAttribute(new Attribute("keyProperty", javaProperty));
@@ -300,9 +305,6 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
 
         String fileNameExt = xmlName.replace(MAPPER_XML_FILE_ENDING_NAME, MAPPER_XML_FILE_POSTFIX + MAPPER_XML_FILE_ENDING_NAME);
 
-//        String targetPackage =
-//                context.getSqlMapGeneratorConfiguration().getTargetPackage() + "." + xmlName.substring(0,
-//                                                                                                       xmlName.lastIndexOf(MAPPER_XML_FILE_ENDING_NAME)).toLowerCase(Locale.ROOT);
         String targetPackage =
                 context.getSqlMapGeneratorConfiguration().getTargetPackage();
 //        判断扩展xml文件是否存在，存在则不生成扩展xml，指覆盖默认xml
@@ -342,75 +344,75 @@ public class MultiDbPaginationPlugin extends PluginAdapter {
 //        return generatedJavaFiles;
 //    }
 
-//    发现插件生成不支持泛型
-    protected GeneratedJavaFile generateBaseMapperJava(IntrospectedTable introspectedTable) {
-        FullyQualifiedJavaType typeT = new FullyQualifiedJavaType("T");
-        FullyQualifiedJavaType typeE = new FullyQualifiedJavaType("E");
-        FullyQualifiedJavaType type =
-                new FullyQualifiedJavaType(context.getJavaClientGeneratorConfiguration().getTargetPackage()+
-                                                   "." + BaseMapper.class.getSimpleName());
-        type.addTypeArgument(typeT);
-        type.addTypeArgument(typeE);
-        Interface interfaze = new Interface(type);
-        interfaze.setVisibility(JavaVisibility.PUBLIC);
-        context.getCommentGenerator().addJavaFileComment(interfaze);
+////    发现插件生成不支持泛型
+//    protected GeneratedJavaFile generateBaseMapperJava(IntrospectedTable introspectedTable) {
+//        FullyQualifiedJavaType typeT = new FullyQualifiedJavaType("T");
+//        FullyQualifiedJavaType typeE = new FullyQualifiedJavaType("E");
+//        FullyQualifiedJavaType type =
+//                new FullyQualifiedJavaType(context.getJavaClientGeneratorConfiguration().getTargetPackage()+
+//                                                   "." + BaseMapper.class.getSimpleName());
+//        type.addTypeArgument(typeT);
+//        type.addTypeArgument(typeE);
+//        Interface interfaze = new Interface(type);
+//        interfaze.setVisibility(JavaVisibility.PUBLIC);
+//        context.getCommentGenerator().addJavaFileComment(interfaze);
+//
+//        FullyQualifiedJavaType paramJavaType = new FullyQualifiedJavaType(Param.class.getName());
+//        interfaze.addImportedType(paramJavaType);
+//        FullyQualifiedJavaType listType = new FullyQualifiedJavaType(List.class.getName());
+//        interfaze.addImportedType(listType);
+//
+//
+//        Parameter paramT = new Parameter(typeT, PARAM_NAME_RECORD);
+//        Parameter paramE = new Parameter(typeE, PARAM_NAME_EXAMPLE);
+//        Parameter parameterT = new Parameter(typeT, PARAM_NAME_RECORD, ANNOTATION_RECORD);
+//        Parameter parameterE = new Parameter(typeE, PARAM_NAME_EXAMPLE, ANNOTATION_EXAMPLE);
+//
+//        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "insertSelective",
+//                              paramT);
+//        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()),
+//                              "updateByExampleSelective", parameterT, parameterE);
+//        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()),
+//                              "updateByPrimaryKeySelective", paramT);
+//        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "deleteByPrimaryKey",
+//                              paramT);
+//        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "deleteByExample",
+//                              paramE);
+//        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "countByExample",
+//                              paramE);
+//        createInterfaceMethod(interfaze, typeT, "selectByPrimaryKey",
+//                              paramT);
+//        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(List.class.getName() + "<T>"), "deleteByExample",
+//                              paramE);
+//
+//
+//        if (isExistExtFile(context.getJavaClientGeneratorConfiguration().getTargetProject(),
+//                           context.getJavaClientGeneratorConfiguration().getTargetPackage(),
+//                           BaseMapper.class.getName() + ".java")) {
+//            return null;
+//        }
+//        GeneratedJavaFile generatedJavaFile = new GeneratedJavaFile(interfaze,
+//                                                                    context.getJavaClientGeneratorConfiguration().getTargetProject(),
+//                                                                    context.getProperty(
+//                                                                            PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING),
+//                                                                    context.getJavaFormatter());
+//        return generatedJavaFile;
+//    }
 
-        FullyQualifiedJavaType paramJavaType = new FullyQualifiedJavaType(Param.class.getName());
-        interfaze.addImportedType(paramJavaType);
-        FullyQualifiedJavaType listType = new FullyQualifiedJavaType(List.class.getName());
-        interfaze.addImportedType(listType);
-
-
-        Parameter paramT = new Parameter(typeT, PARAM_NAME_RECORD);
-        Parameter paramE = new Parameter(typeE, PARAM_NAME_EXAMPLE);
-        Parameter parameterT = new Parameter(typeT, PARAM_NAME_RECORD, ANNOTATION_RECORD);
-        Parameter parameterE = new Parameter(typeE, PARAM_NAME_EXAMPLE, ANNOTATION_EXAMPLE);
-
-        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "insertSelective",
-                              paramT);
-        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()),
-                              "updateByExampleSelective", parameterT, parameterE);
-        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()),
-                              "updateByPrimaryKeySelective", paramT);
-        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "deleteByPrimaryKey",
-                              paramT);
-        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "deleteByExample",
-                              paramE);
-        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(Integer.class.getName()), "countByExample",
-                              paramE);
-        createInterfaceMethod(interfaze, typeT, "selectByPrimaryKey",
-                              paramT);
-        createInterfaceMethod(interfaze, new FullyQualifiedJavaType(List.class.getName() + "<T>"), "deleteByExample",
-                              paramE);
-
-
-        if (isExistExtFile(context.getJavaClientGeneratorConfiguration().getTargetProject(),
-                           context.getJavaClientGeneratorConfiguration().getTargetPackage(),
-                           BaseMapper.class.getName() + ".java")) {
-            return null;
-        }
-        GeneratedJavaFile generatedJavaFile = new GeneratedJavaFile(interfaze,
-                                                                    context.getJavaClientGeneratorConfiguration().getTargetProject(),
-                                                                    context.getProperty(
-                                                                            PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING),
-                                                                    context.getJavaFormatter());
-        return generatedJavaFile;
-    }
-
-    private void createInterfaceMethod(Interface interfaze, FullyQualifiedJavaType returnType, String methodName,
-                                       Parameter... params) {
-        Method method = new Method();
-        method.setReturnType(returnType);
-        method.setName(methodName);
-        method.addJavaDocLine("test");
-        if (params != null || params.length > 0) {
-            for (Parameter param : params
-                 ) {
-                method.addParameter(param);
-            }
-        }
-        interfaze.addMethod(method);
-    }
+//    private void createInterfaceMethod(Interface interfaze, FullyQualifiedJavaType returnType, String methodName,
+//                                       Parameter... params) {
+//        Method method = new Method();
+//        method.setReturnType(returnType);
+//        method.setName(methodName);
+//        method.addJavaDocLine("test");
+//        if (params != null || params.length > 0) {
+//            for (Parameter param : params
+//                 ) {
+//                method.addParameter(param);
+//            }
+//        }
+//        interfaze.addMethod(method);
+//    }
 
     protected boolean isExistExtFile(String targetProject, String targetPackage, String fileName) {
 
